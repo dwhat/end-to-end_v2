@@ -79,7 +79,18 @@ class UsersController < ApplicationController
   # DELETE /users/1
   # DELETE /users/1.json
   def destroy
-    HTTParty.delete("http://#{WebClient::Application::SERVER_IP}/#{@user.name}")
+    respond_to do |format|
+      response = HTTParty.delete("http://#{WebClient::Application::SERVER_IP}/#{@user.name}")
+
+      if response == "200"
+        @user.destroy
+        format.html { redirect_to root_url, notice: 'User was successfully destroyed.' }
+        format.json { head :no_content }
+      else
+        format.html { redirect_to users_url, notice: 'User konnte nicht gelöscht werden.'}
+      end
+    end
+
     @user.destroy
     respond_to do |format|
       format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
