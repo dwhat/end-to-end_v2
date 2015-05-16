@@ -28,6 +28,7 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
     arel (5.0.1.20140414130214)
+    bcrypt (3.1.10)
     builder (3.2.2)
     coffee-rails (4.0.1)
       coffee-script (>= 2.2.0)
@@ -40,6 +41,9 @@ GEM
     erubis (2.7.0)
     execjs (2.5.2)
     hike (1.2.3)
+    httparty (0.13.4)
+      json (~> 1.8)
+      multi_xml (>= 0.5.2)
     i18n (0.7.0)
     jbuilder (2.2.13)
       activesupport (>= 3.0.0, < 5)
@@ -59,6 +63,7 @@ GEM
     mime-types (2.5)
     minitest (5.6.1)
     multi_json (1.11.0)
+    multi_xml (0.5.5)
     rack (1.5.3)
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -124,7 +129,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bcrypt (~> 3.1.7)
   coffee-rails (~> 4.0.0)
+  httparty
   jbuilder (~> 2.0)
   jquery-rails
   less-rails
