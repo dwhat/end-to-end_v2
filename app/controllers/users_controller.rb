@@ -26,7 +26,6 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
 
-
     #erzeugen des salts
     salt_masterkey = OpenSSL::Random.random_bytes 64
 
@@ -51,10 +50,8 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if response["status"] == "200"
-        log_in @user
         if @user.save
-
-
+          log_in @user
           format.html { redirect_to messages_url, notice: 'User was successfully created.' }
           format.json { render :show, status: :created, location: @user }
         else
