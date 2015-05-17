@@ -9,7 +9,7 @@ class UsersController < ApplicationController
 
   # GET /users/1
   # GET /users/1.json
-  def showr
+  def show
   end
 
   # GET /users/new
@@ -41,7 +41,7 @@ class UsersController < ApplicationController
     privkey_user_enc = keys.export method, masterkey
 
     #Übermittlung des user, salt_masterkey, pubkey & priv_key_user_enc an den Dienstanbieter
-    HTTParty.post("http://#{WebClient::Application::SERVER_IP}/",
+    response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/",
                   :body => {:name => @user.name,
                             :salt_masterkey => encodeToString(salt_masterkey),
                             :pubkey_user => keys.public_key.to_s,
@@ -50,12 +50,20 @@ class UsersController < ApplicationController
                   :headers => { 'Content-Type' => 'application/json'} )
 
     respond_to do |format|
-      if @user.save
+      if response["status"] == "200"
         log_in @user
+        if @user.save
 
-        format.html { redirect_to @user, notice: 'User was successfully created.' }
-        format.json { render :show, status: :created, location: @user }
+
+          format.html { redirect_to messages_url, notice: 'User was successfully created.' }
+          format.json { render :show, status: :created, location: @user }
+        else
+          # User konnte lokal nicht persistiert werden
+          format.html { render :new }
+          format.json { render json: @user.errors, status: :unprocessable_entity }
+        end
       else
+        # User konnte beim Dienstanbieter nicht persistiert werden
         format.html { render :new }
         format.json { render json: @user.errors, status: :unprocessable_entity }
       end
@@ -82,19 +90,13 @@ class UsersController < ApplicationController
     respond_to do |format|
       response = HTTParty.delete("http://#{WebClient::Application::SERVER_IP}/#{@user.name}")
 
-      if response == "200"
+      if response["status"] == "200"
         @user.destroy
-        format.html { redirect_to root_url, notice: 'User was successfully destroyed.' }
+        format.html { redirect_to( root_url, notice: 'User was successfully destroyed.') }
         format.json { head :no_content }
       else
         format.html { redirect_to users_url, notice: 'User konnte nicht gelöscht werden.'}
       end
-    end
-
-    @user.destroy
-    respond_to do |format|
-      format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
-      format.json { head :no_content }
     end
   end
 
