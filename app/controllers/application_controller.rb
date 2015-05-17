@@ -11,6 +11,6 @@ class ApplicationController < ActionController::Base
   end
 
   def encodeToString(text)
-    return Base64.encode64(text).encode('utf-8')
+    return Base64.strict_encode64(text)
   end
 end

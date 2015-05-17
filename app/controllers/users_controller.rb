@@ -37,13 +37,13 @@ class UsersController < ApplicationController
     #erzeugen des Schlüsselpaares
     keys = OpenSSL::PKey::RSA.new 2048
     method = OpenSSL::Cipher.new 'AES-128-ECB'
-    privkey_user_enc = keys.export method, masterkey
+    privkey_user_enc = keys.to_pem(method, masterkey)
 
     #Übermittlung des user, salt_masterkey, pubkey & priv_key_user_enc an den Dienstanbieter
     response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/",
                   :body => {:name => @user.name,
                             :salt_masterkey => encodeToString(salt_masterkey),
-                            :pubkey_user => keys.public_key.to_s,
+                            :pubkey_user => encodeToString(keys.public_key.to_pem),
                             :privkey_user_enc => encodeToString(privkey_user_enc)
                   }.to_json,
                   :headers => { 'Content-Type' => 'application/json'} )
