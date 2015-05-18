@@ -15,8 +15,14 @@ class SessionController < ApplicationController
         digest = OpenSSL::Digest::SHA256.new
         masterkey = OpenSSL::PKCS5.pbkdf2_hmac(params[:session][:password], Base64.strict_decode64(response["salt_masterkey"]), iter, 256, digest)
         #entschlüsseln des privkey_user_enc zu priv_key_user
-        privkey_user = OpenSSL::PKey::RSA.new(Base64.strict_decode64(response["privkey_user_enc"]), masterkey)
-        Rails.cache.write("privkey_user", privkey_user)
+        privkey_user_enc_base = Base64.strict_decode64(response["privkey_user_enc"])
+
+        decipher = OpenSSL::Cipher::AES.new(128, :ECB)
+        decipher.decrypt
+        decipher.key = masterkey
+
+        privkey_user_enc = decipher.update(privkey_user_enc_base) + decipher.final
+        $privkey_user = OpenSSL::PKey::RSA.new(privkey_user_enc, masterkey)
 
 
         redirect_to messages_url

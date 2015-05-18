@@ -36,8 +36,12 @@ class UsersController < ApplicationController
 
     #erzeugen des Schlüsselpaares
     keys = OpenSSL::PKey::RSA.new 2048
-    method = OpenSSL::Cipher.new 'AES-128-ECB'
-    privkey_user_enc = keys.to_pem(method, masterkey)
+    # Verschlüsseln des Private keys
+    $privkey_user = keys.to_pem
+    cipher = OpenSSL::Cipher::AES.new(128, :ECB)
+    cipher.encrypt
+    cipher.key = masterkey
+    privkey_user_enc = cipher.update($privkey_user) + cipher.final
 
     #Übermittlung des user, salt_masterkey, pubkey & priv_key_user_enc an den Dienstanbieter
     response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/",
