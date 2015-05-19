@@ -23,7 +23,11 @@
     <%= error_span(@message[:sender]) %>
   </div>
     <div class="control-group">
-    <%= f.select(:recipient, @recipients.map { |value| [ value, value ] }) %>
+      <%= f.label :recipient, :class => 'control-label' %>
+      <div class="controls">
+        <%= f.select(:recipient, @recipients.map { |value| [ value, value ] }) %>
+      </div>
+      <%= error_span(@message[:sender]) %>
     </div>
   <div class="control-group">
     <%= f.label :message, :class => 'control-label' %>

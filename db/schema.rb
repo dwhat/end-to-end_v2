@@ -16,6 +16,7 @@ ActiveRecord::Schema.define(version: 20150513172101) do
   create_table "messages", force: true do |t|
     t.string   "sender"
     t.text     "message"
+    t.string   "recipient"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
