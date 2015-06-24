@@ -15,13 +15,8 @@
     </div>
   <% end %>
 
-  <div class="control-group">
-    <%= f.label :sender, :class => 'control-label' %>
-    <div class="controls">
-      <%= f.text_field :sender, :class => 'form-control' %>
-    </div>
-    <%= error_span(@message[:sender]) %>
-  </div>
+      <%= f.hidden_field :sender, :value => current_user.name %>
+
     <div class="control-group">
       <%= f.label :recipient, :class => 'control-label' %>
       <div class="controls">

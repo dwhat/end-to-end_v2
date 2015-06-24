@@ -5,7 +5,6 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th><%= model_class.human_attribute_name(:id) %></th>
       <th><%= model_class.human_attribute_name(:sender) %></th>
       <th><%= model_class.human_attribute_name(:message) %></th>
       <th><%= model_class.human_attribute_name(:created_at) %></th>
@@ -15,7 +14,6 @@
   <tbody>
     <% @messages.each do |message| %>
       <tr>
-        <td><%= link_to message.id, message_path(message) %></td>
         <td><%= message.sender %></td>
         <td><%= message.message %></td>
         <td><%=l message.created_at %></td>

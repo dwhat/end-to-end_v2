@@ -9,6 +9,7 @@ class SessionController < ApplicationController
       response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{@user.name}")
 
       #if response["status"] == "200"
+      if response["status"].nil?
 
         #erzeugen des masterkeys
         iter = 10000
@@ -24,11 +25,13 @@ class SessionController < ApplicationController
         privkey_user_enc = decipher.update(privkey_user_enc_base) + decipher.final
         $privkey_user = OpenSSL::PKey::RSA.new(privkey_user_enc, masterkey)
 
-
+        puts "============================================"
+        puts "User logged in and Session created"
+        puts "============================================"
         redirect_to messages_url
-      #else
-      #  render 'new'
-      #end
+      else
+        render 'new'
+      end
 
 
     else

@@ -10,10 +10,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def encodeToString(text)
-    return Base64.strict_encode64(text)
-  end
-
   def fetchRecipients
     response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/")
     @recipients = []

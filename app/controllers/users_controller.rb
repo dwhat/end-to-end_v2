@@ -42,16 +42,20 @@ class UsersController < ApplicationController
     cipher.encrypt
     cipher.key = masterkey
     privkey_user_enc = cipher.update($privkey_user) + cipher.final
+    # privkey_user von PEM Format wieder in ein RSA Keypair umwandeln
+    $privkey_user = keys
 
     #Übermittlung des user, salt_masterkey, pubkey & priv_key_user_enc an den Dienstanbieter
     response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/",
                   :body => {:name => @user.name,
-                            :salt_masterkey => encodeToString(salt_masterkey),
-                            :pubkey_user => encodeToString(keys.public_key.to_pem),
-                            :privkey_user_enc => encodeToString(privkey_user_enc)
+                            :salt_masterkey => Base64.strict_encode64(salt_masterkey),
+                            :pubkey_user => Base64.strict_encode64(keys.public_key.to_pem),
+                            :privkey_user_enc => Base64.strict_encode64(privkey_user_enc)
                   }.to_json,
                   :headers => { 'Content-Type' => 'application/json'} )
-
+    puts "============================================"
+    puts "User created"
+    puts "============================================"
     respond_to do |format|
       if response["status"] == "200"
         if @user.save

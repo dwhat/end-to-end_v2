@@ -6,7 +6,9 @@ class MessagesController < ApplicationController
   # GET /messages.json
   def index
     fetchMessages
-    @messages = Message.all
+    #@messages = Message.all
+    @messages = Message.where(recipient: current_user.name)
+
   end
 
   # GET /messages/1
@@ -28,6 +30,7 @@ class MessagesController < ApplicationController
   # POST /messages.json
   def create
     @message = Message.new(message_params)
+    post_message
 
     respond_to do |format|
       if @message.save
@@ -58,6 +61,9 @@ class MessagesController < ApplicationController
   # DELETE /messages/1.json
   def destroy
     @message.destroy
+    puts "============================================"
+    puts "Message deleted"
+    puts "============================================"
     respond_to do |format|
       format.html { redirect_to messages_url, notice: 'Message was successfully destroyed.' }
       format.json { head :no_content }
@@ -73,5 +79,54 @@ class MessagesController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def message_params
       params.require(:message).permit(:sender, :message, :recipient)
+    end
+
+    def post_message
+      @user = current_user
+
+      # Pubkey des Users holen
+      response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{@message.recipient}/pubkey")
+      pubkey_recipient = OpenSSL::PKey::RSA.new(Base64.strict_decode64(response["pubkey_user"]))
+
+      # Nachricht verschlüsseln
+      cipher = OpenSSL::Cipher.new('AES-128-CBC')
+      cipher.padding = 1
+      cipher.encrypt
+      cipher.key_len = 16
+      key_recipient = cipher.random_key
+      iv = cipher.random_iv
+      cipher.iv = iv
+      encrypted_message = cipher.update(@message.message) + cipher.final
+
+      # Verschlüsselung des key_recipient zu key_recipient_enc mittels RSA
+      key_recipient_enc = pubkey_recipient.public_encrypt(key_recipient.to_s)
+
+      # inner_envelope für die Signaturbestimmung bilden
+      inner_envelope = @user.name.to_s+cipher.to_s+iv.to_s+key_recipient_enc.to_s
+
+      # Signatur sig_recipient bilden
+      digest = OpenSSL::Digest::SHA256.new
+      sig_recipient = $privkey_user.sign digest, inner_envelope
+
+      # Signatur sig_service bilden
+      timestamp = Time.now.to_i
+      document = inner_envelope.to_s+timestamp.to_s+@message.recipient.to_s
+
+      sig_service = $privkey_user.sign digest, document
+
+      response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/messages",
+                               :body => {:sender => @user.name,
+                                        :cipher => Base64.strict_encode64(encrypted_message),
+                                        :iv => Base64.strict_encode64(iv),
+                                        :key_recipient_enc => Base64.strict_encode64(key_recipient_enc),
+                                        :sig_recipient => Base64.strict_encode64(sig_recipient),
+                                        :timestamp => timestamp,
+                                        :recipient => @message.recipient,
+                                        :sig_service => Base64.strict_encode64(sig_service)
+                               }.to_json,
+                               :headers => { 'Content-Type' => 'application/json'} )
+      puts "============================================"
+      puts "Message created"
+      puts "============================================"
     end
 end
