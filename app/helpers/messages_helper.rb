@@ -7,22 +7,22 @@ module MessagesHelper
     puts '==============================='
     puts document
     puts '==============================='
-    puts Base64.strict_encode64(sig_user)
-    puts '==============================='
     response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{current_user.name}/messages",
                             :body => {:sig_user => Base64.strict_encode64(sig_user),
                                       :timestamp => timestamp
                             }.to_json,
                             :headers => { 'Content-Type' => 'application/json'} )
 
-    if response != '[0]'
+    puts response.to_s
+
+    if !response.nil?
       response.each do |item|
 
         # Signaturprüfung
         response_pubkey = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{item["sender"]}/pubkey")
         pubkey_sender = OpenSSL::PKey::RSA.new(Base64.strict_decode64(response_pubkey["pubkey_user"]))
 
-        document = Base64.strict_decode64(item["recipient"]).to_s+Base64.strict_decode64(item["cipher"]).to_s+Base64.strict_decode64(item["iv"]).to_s+Base64.strict_decode64(item["key_recipient_enc"]).to_s
+        document = item["sender"] + Base64.strict_decode64(item["cipher"]).to_s + Base64.strict_decode64(item["iv"]).to_s + Base64.strict_decode64(item["key_recipient_enc"]).to_s
 
         if pubkey_sender.verify digest, Base64.strict_decode64(item["sig_recipient"]), document
           puts "============================================"
@@ -37,7 +37,8 @@ module MessagesHelper
 
           message = decipher.update(Base64.strict_decode64(item["cipher"])) + decipher.final
 
-          Message.new(sender: sender, message: message, recipient: current_user.name)
+          @message = Message.new(sender: item["sender"], message: message, recipient: current_user.name)
+          @message.save
           puts "============================================"
           puts "cipher decrypted and saved"
           puts "============================================"

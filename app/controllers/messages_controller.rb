@@ -33,13 +33,8 @@ class MessagesController < ApplicationController
     post_message
 
     respond_to do |format|
-      if @message.save
         format.html { redirect_to @message, notice: 'Message was successfully created.' }
         format.json { render :show, status: :created, location: @message }
-      else
-        format.html { render :new }
-        format.json { render json: @message.errors, status: :unprocessable_entity }
-      end
     end
   end
 
@@ -102,7 +97,7 @@ class MessagesController < ApplicationController
       key_recipient_enc = pubkey_recipient.public_encrypt(key_recipient.to_s)
 
       # inner_envelope für die Signaturbestimmung bilden
-      inner_envelope = @user.name.to_s+cipher.to_s+iv.to_s+key_recipient_enc.to_s
+      inner_envelope = @user.name.to_s+encrypted_message.to_s+iv.to_s+key_recipient_enc.to_s
 
       # Signatur sig_recipient bilden
       digest = OpenSSL::Digest::SHA256.new
@@ -111,7 +106,7 @@ class MessagesController < ApplicationController
       # Signatur sig_service bilden
       timestamp = Time.now.to_i
       document = inner_envelope.to_s+timestamp.to_s+@message.recipient.to_s
-
+      puts document
       sig_service = $privkey_user.sign digest, document
 
       response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/messages",
@@ -125,8 +120,18 @@ class MessagesController < ApplicationController
                                         :sig_service => Base64.strict_encode64(sig_service)
                                }.to_json,
                                :headers => { 'Content-Type' => 'application/json'} )
+      if response["status"] == '200'
       puts "============================================"
       puts "Message created"
       puts "============================================"
+      elsif response["status"] == '503'
+      puts "============================================"
+      puts "Signature not valid"
+      puts "============================================"
+      elsif response["status"] == '502'
+      puts "============================================"
+      puts "Timestamp not valid"
+      puts "============================================"
+      end
     end
 end
