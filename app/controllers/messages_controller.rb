@@ -82,6 +82,10 @@ class MessagesController < ApplicationController
       # Pubkey des Users holen
       response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{@message.recipient}/pubkey")
       pubkey_recipient = OpenSSL::PKey::RSA.new(Base64.decode64(response["pubkey_user"]))
+      puts "============================================"
+      puts "Public Key des Empfaengers geholt. #{pubkey_recipient}"
+      puts "============================================"
+
 
       # Nachricht verschlüsseln
       cipher = OpenSSL::Cipher.new('AES-128-CBC')
@@ -92,12 +96,19 @@ class MessagesController < ApplicationController
       iv = cipher.random_iv
       cipher.iv = iv
       encrypted_message = cipher.update(@message.message) + cipher.final
+      puts "============================================"
+      puts "Nachricht verschluesselt"
+      puts "============================================"
+
 
       # Verschlüsselung des key_recipient zu key_recipient_enc mittels RSA
       key_recipient_enc = pubkey_recipient.public_encrypt(key_recipient.to_s)
 
       # inner_envelope für die Signaturbestimmung bilden
       inner_envelope = @user.name.to_s+encrypted_message.to_s+iv.to_s+key_recipient_enc.to_s
+      puts "============================================"
+      puts "Inneren Umschlag mit Identitaet, Cipher, Initialisierungsvektor, verschluesselten symmetrischen Schluessel und Empfaenger Signatur angelegt."
+      puts "============================================"
 
       # Signatur sig_recipient bilden
       digest = OpenSSL::Digest::SHA256.new
@@ -106,7 +117,7 @@ class MessagesController < ApplicationController
       # Signatur sig_service bilden
       timestamp = Time.now.to_i
       document = inner_envelope.to_s+timestamp.to_s+@message.recipient.to_s
-      puts document
+      puts "Innerer Umschlag und Timestamp und Empfaeger (Aeusserer Umschlag): #{document}"
       sig_service = $privkey_user.sign digest, document
 
       response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/messages",
