@@ -5,7 +5,7 @@ module MessagesHelper
     document = current_user.name.to_s+timestamp.to_s
     sig_user = $privkey_user.sign digest, document
     puts '==============================='
-    puts document
+    #puts "Username und Timestamp: #{document}"
     puts '==============================='
     response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{current_user.name}/messages",
                             :body => {:sig_user => Base64.strict_encode64(sig_user),
