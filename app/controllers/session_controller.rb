@@ -14,9 +14,9 @@ class SessionController < ApplicationController
         #erzeugen des masterkeys
         iter = 10000
         digest = OpenSSL::Digest::SHA256.new
-        masterkey = OpenSSL::PKCS5.pbkdf2_hmac(params[:session][:password], Base64.strict_decode64(response["salt_masterkey"]), iter, 256, digest)
+        masterkey = OpenSSL::PKCS5.pbkdf2_hmac(params[:session][:password], Base64.decode64(response["salt_masterkey"]), iter, 256, digest)
         #entschlüsseln des privkey_user_enc zu priv_key_user
-        privkey_user_enc_base = Base64.strict_decode64(response["privkey_user_enc"])
+        privkey_user_enc_base = Base64.decode64(response["privkey_user_enc"])
 
         decipher = OpenSSL::Cipher::AES.new(128, :ECB)
         decipher.decrypt

@@ -20,11 +20,11 @@ module MessagesHelper
 
         # Signaturprüfung
         response_pubkey = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{item["sender"]}/pubkey")
-        pubkey_sender = OpenSSL::PKey::RSA.new(Base64.strict_decode64(response_pubkey["pubkey_user"]))
+        pubkey_sender = OpenSSL::PKey::RSA.new(Base64.decode64(response_pubkey["pubkey_user"]))
 
-        document = item["sender"] + Base64.strict_decode64(item["cipher"]).to_s + Base64.strict_decode64(item["iv"]).to_s + Base64.strict_decode64(item["key_recipient_enc"]).to_s
+        document = item["sender"] + Base64.decode64(item["cipher"]).to_s + Base64.decode64(item["iv"]).to_s + Base64.decode64(item["key_recipient_enc"]).to_s
 
-        if pubkey_sender.verify digest, Base64.strict_decode64(item["sig_recipient"]), document
+        if pubkey_sender.verify digest, Base64.decode64(item["sig_recipient"]), document
           puts "============================================"
           puts "sig_recipient valid"
           puts "============================================"
@@ -32,10 +32,10 @@ module MessagesHelper
           decipher = OpenSSL::Cipher.new('AES-128-CBC')
           decipher.padding =1
           decipher.decrypt
-          decipher.key = $privkey_user.private_decrypt(Base64.strict_decode64(item["key_recipient_enc"].to_s))
-          decipher.iv = Base64.strict_decode64(item["iv"])
+          decipher.key = $privkey_user.private_decrypt(Base64.decode64(item["key_recipient_enc"].to_s))
+          decipher.iv = Base64.decode64(item["iv"])
 
-          message = decipher.update(Base64.strict_decode64(item["cipher"])) + decipher.final
+          message = decipher.update(Base64.decode64(item["cipher"])) + decipher.final
 
           @message = Message.new(sender: item["sender"], message: message, recipient: current_user.name)
           @message.save

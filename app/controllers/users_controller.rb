@@ -48,18 +48,19 @@ class UsersController < ApplicationController
     #Übermittlung des user, salt_masterkey, pubkey & priv_key_user_enc an den Dienstanbieter
     response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/",
                   :body => {:name => @user.name,
-                            :salt_masterkey => Base64.strict_encode64(salt_masterkey),
-                            :pubkey_user => Base64.strict_encode64(keys.public_key.to_pem),
-                            :privkey_user_enc => Base64.strict_encode64(privkey_user_enc)
+                            :salt_masterkey => Base64.encode64(salt_masterkey),
+                            :pubkey_user => Base64.encode64(keys.public_key.to_pem),
+                            :privkey_user_enc => Base64.encode64(privkey_user_enc)
                   }.to_json,
                   :headers => { 'Content-Type' => 'application/json'} )
-    puts "============================================"
-    puts "User created"
-    puts "============================================"
+
     respond_to do |format|
       if response["status"] == "200"
         if @user.save
           log_in @user
+          puts "============================================"
+          puts "User created"
+          puts "============================================"
           format.html { redirect_to messages_url, notice: 'User was successfully created.' }
           format.json { render :show, status: :created, location: @user }
         else

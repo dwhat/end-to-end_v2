@@ -81,7 +81,7 @@ class MessagesController < ApplicationController
 
       # Pubkey des Users holen
       response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{@message.recipient}/pubkey")
-      pubkey_recipient = OpenSSL::PKey::RSA.new(Base64.strict_decode64(response["pubkey_user"]))
+      pubkey_recipient = OpenSSL::PKey::RSA.new(Base64.decode64(response["pubkey_user"]))
 
       # Nachricht verschlüsseln
       cipher = OpenSSL::Cipher.new('AES-128-CBC')
@@ -111,13 +111,13 @@ class MessagesController < ApplicationController
 
       response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/messages",
                                :body => {:sender => @user.name,
-                                        :cipher => Base64.strict_encode64(encrypted_message),
-                                        :iv => Base64.strict_encode64(iv),
-                                        :key_recipient_enc => Base64.strict_encode64(key_recipient_enc),
-                                        :sig_recipient => Base64.strict_encode64(sig_recipient),
+                                        :cipher => Base64.encode64(encrypted_message),
+                                        :iv => Base64.encode64(iv),
+                                        :key_recipient_enc => Base64.encode64(key_recipient_enc),
+                                        :sig_recipient => Base64.encode64(sig_recipient),
                                         :timestamp => timestamp,
                                         :recipient => @message.recipient,
-                                        :sig_service => Base64.strict_encode64(sig_service)
+                                        :sig_service => Base64.encode64(sig_service)
                                }.to_json,
                                :headers => { 'Content-Type' => 'application/json'} )
       if response["status"] == '200'
