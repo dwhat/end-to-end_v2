@@ -7,13 +7,31 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-<% if logged_in?%>
-    User: <%= current_user.name %>
-    <%= link_to "Messages", messages_path %>
-    <%= link_to "Logout", logout_path, method: :delete %>
-<% else%>
-    <%= link_to "Login", login_path %>
-<% end %>
-<%= yield %>
+<nav class="navbar navbar-fixed-top">
+  <div class="container">
+  <div class="navbar-header pull-left">
+    <a class="navbar-brand" href="#">End2End</a>
+  </div>
+  <div class="navbar-header pull-right">
+    <ul class="nav navbar-nav navbar-right">
+      <% if logged_in?%>
+          <li data-toggle="tooltip" data-placement="bottom" title="Nachrichten"> <%= link_to messages_path do %>
+                <i class="fa fa-envelope"></i> <span class="visible-lg visible-md pull-right"> Nachrichten</span></li>
+            <% end %>
+
+            <li data-toggle="tooltip" data-placement="bottom" title="Logout <%= current_user.name %>"> <%= link_to logout_path, method: :delete do %>
+                  <i class="fa fa-user"></i> <span class="visible-lg visible-md pull-right"> <%= current_user.name %></span></li>
+              <% end %>
+
+      <% end %>
+    </ul>
+
+  </div>
+  </div>
+</nav>
+
+<section class="container">
+    <%= yield %>
+</section>
 </body>
 </html>
