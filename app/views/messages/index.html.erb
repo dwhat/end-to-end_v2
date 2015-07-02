@@ -11,7 +11,7 @@
         <%= link_to(message_path(message), :method => :delete, data: { confirm: 'Are you sure?' }) do %>
         <td>
           <strong> <%= message.sender %></strong>
-          <span class="pull-right"> <small><%= message.created_at.strftime("%m/%d/%Y %H:%M ") %></small></span><br>
+          <span class="pull-right"> <small><%= message.created_at.strftime("%m/%d/%Y") %></small></span><br>
           <%= message.message %>
         </td>
         <% end %>
