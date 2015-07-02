@@ -11,8 +11,8 @@ Bundler.require(*Rails.groups)
 module WebClient
   class Application < Rails::Application
 
-    #SERVER_IP = "10.60.70.1"
-    SERVER_IP = "localhost:3001"
+    SERVER_IP = "10.60.70.1"
+    #SERVER_IP = "localhost:3001"
 
     CACHE_VAR = {}
     # Settings in config/environments/* take precedence over those specified here.

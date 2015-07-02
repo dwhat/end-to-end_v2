@@ -59,7 +59,7 @@ class UsersController < ApplicationController
         if @user.save
           log_in @user
           puts "============================================"
-          puts "User angelegt mit Namen: {@user.name}"
+          puts "User angelegt mit Namen: #{@user.name}"
           puts "============================================"
           format.html { redirect_to messages_url, notice: 'User was successfully created.' }
           format.json { render :show, status: :created, location: @user }

@@ -123,6 +123,18 @@ class MessagesController < ApplicationController
       puts "Innerer Umschlag und Timestamp und Empfaeger (Aeusserer Umschlag): #{document}"
       sig_service = $privkey_user.sign digest, document
 
+      puts "============================================"
+      puts "Message Input:"
+      puts '{"sender":"'+@user.name+'",'
+      puts '"cipher":"'+Base64.strict_encode64(encrypted_message)+'",'
+      puts '"iv":"'+Base64.strict_encode64(iv)+'",'
+      puts '"key_recipient_enc":"'+Base64.strict_encode64(key_recipient_enc)+'",'
+      puts '"sig_recipient":"'+Base64.strict_encode64(sig_recipient)+'",'
+      puts '"timestamp":"'+timestamp.to_s+'",'
+      puts '"recipient":"'+@message.recipient+'",'
+      puts '"sig_service":"'+Base64.strict_encode64(sig_service)+'"}'
+      puts "============================================"
+
       response = HTTParty.post("http://#{WebClient::Application::SERVER_IP}/messages",
                                :body => {:sender => @user.name,
                                         :cipher => Base64.encode64(encrypted_message),
