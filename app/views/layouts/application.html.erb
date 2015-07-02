@@ -10,28 +10,60 @@
 <nav class="navbar navbar-fixed-top">
   <div class="container">
   <div class="navbar-header pull-left">
-    <a class="navbar-brand" href="#">End2End</a>
+    <% if logged_in?%>
+    <%= link_to "End2End", messages_path, class: "navbar-brand" %>
+    <% else %>
+    <a class="navbar-brand">End2End</a>
+    <% end %>
   </div>
   <div class="navbar-header pull-right">
-    <ul class="nav navbar-nav navbar-right">
-      <% if logged_in?%>
-          <li data-toggle="tooltip" data-placement="bottom" title="Nachrichten"> <%= link_to messages_path do %>
-                <i class="fa fa-envelope"></i> <span class="visible-lg visible-md pull-right"> Nachrichten</span></li>
+    <% if logged_in?%>
+    <ul class="nav navbar-nav navbar-right">_
+          <li data-toggle="tooltip" data-placement="left" title="Messages">
+            <%= link_to messages_path do %>
+                <i class="fa fa-envelope"></i>
+                <span class="visible-lg visible-md pull-right"> Messages</span>
             <% end %>
-
-            <li data-toggle="tooltip" data-placement="bottom" title="Logout <%= current_user.name %>"> <%= link_to logout_path, method: :delete do %>
-                  <i class="fa fa-user"></i> <span class="visible-lg visible-md pull-right"> <%= current_user.name %></span></li>
-              <% end %>
-
-      <% end %>
+          </li>
     </ul>
+    <% else %>
+        <%= form_for(:session, url: login_path, html: {class: "navbar-form navbar-right"}) do |f| %>
+            <div class="form-group">
+              <%= f.text_field :name, class: 'form-control', placeholder: :name %>
+            </div>
+            <div class="form-group">
+              <%= f.password_field :password, class: 'form-control', placeholder: :password %>
+            </div>
+
+
+            <%= f.submit "Log in", class: "btn btn-primary" %>
+        <% end %>
+    <% end %>
 
   </div>
   </div>
 </nav>
+<div>
+  <iframe src="https://www.youtube.com/embed/rpWrtXyEAN0?autoplay=1&controls=0&showinfo=0&autohide=1"></iframe>
+</div>
 
 <section class="container">
     <%= yield %>
 </section>
+
+<footer class="footer ">
+  <div class="container">
+    <ul class="nav navbar-nav navbar-right">
+      <% if logged_in?%>
+          <li data-toggle="tooltip" data-placement="left" title="Logout <%= current_user.name %>">
+            <%= link_to logout_path, method: :delete do %>
+            <i class="fa fa-user"></i>
+            <span class="visible-lg visible-md pull-right"> <%= current_user.name %></span>
+            <% end %>
+          </li>
+      <% end %>
+      </ul>
+  </div>
+</footer>
 </body>
 </html>
