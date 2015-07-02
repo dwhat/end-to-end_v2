@@ -1,4 +1,4 @@
-<%= form_for @message, :html => { :class => "form-horizontal message" } do |f| %>
+<%= form_for @message, :html => { :class => "" } do |f| %>
 
     <% if @message.errors.any? %>
     <div id="error_expl" class="panel panel-danger">
@@ -17,24 +17,32 @@
 
       <%= f.hidden_field :sender, :value => current_user.name %>
 
-    <div class="control-group">
+    <div class="form-group">
       <%= f.label :recipient, :class => 'control-label' %>
       <div class="controls">
-        <%= f.select(:recipient, @recipients.map { |value| [ value, value ] }) %>
+        <%= f.select(:recipient, @recipients.map { |value| [ value, value ] }, {}, {class: "form-control"}) %>
       </div>
       <%= error_span(@message[:sender]) %>
     </div>
-  <div class="control-group">
+  <div class="form-group">
     <%= f.label :message, :class => 'control-label' %>
     <div class="controls">
-      <%= f.text_field :message, :class => 'form-control' %>
+      <%= f.text_area :message, :class => 'form-control', :cols => '20', :rows => '10' %>
     </div>
     <%= error_span(@message[:message]) %>
   </div>
 
+    <%= button_tag(type: "submit", class: "btn btn-default") do %>
+        <i class="fa fa-paper-plane pull-left"></i>
+        <span class="visible-lg visible-md pull-right">Send</span>
+    <% end %>
 
-  <%= f.submit nil, :class => 'btn btn-primary' %>
-  <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
-            messages_path, :class => 'btn btn-default' %>
+
+      <%= link_to messages_path do %>
+        <button class="btn btn-default" aria-label="Right Align">
+          <span class="fa fa-times pull-left"></span> <span class="visible-lg visible-md pull-right">Cancle</span>
+        </button>
+      <% end %>
+
 
 <% end %>

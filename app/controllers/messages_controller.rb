@@ -8,12 +8,15 @@ class MessagesController < ApplicationController
     fetchMessages
     #@messages = Message.all
     @messages = Message.where(recipient: current_user.name)
+    fetchRecipients
+    @message = Message.new
 
   end
 
   # GET /messages/1
   # GET /messages/1.json
   def show
+
   end
 
   # GET /messages/new
